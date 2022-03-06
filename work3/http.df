@@ -7,5 +7,5 @@ RUN go build -o httpserver httpserver.go
 FROM busybox
 WORKDIR /httpserver/
 COPY --from=build /httpserver/httpserver /httpserver/httpserver
-EXPOSE 8888
+EXPOSE 80
 CMD ["./httpserver"]
