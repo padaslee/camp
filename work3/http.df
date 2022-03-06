@@ -1,0 +1,11 @@
+FROM golang:alpine AS build
+WORKDIR /httpserver/
+ENV CGO_ENABLED=0
+COPY src/httpserver.go .
+RUN go build -o httpserver httpserver.go
+
+FROM busybox
+WORKDIR /httpserver/
+COPY --from=build /httpserver/httpserver /httpserver/httpserver
+EXPOSE 8888
+CMD ["./httpserver"]

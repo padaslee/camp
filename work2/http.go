@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,21 +9,21 @@ import (
 )
 
 func main() {
+	// glog.V(2).Info("Starting http server...")
 	os.Setenv("VERSION", "V1.0")
+	// Use http.DefaultServerMux
 	// http.HandleFunc("/", index)
-	http.HandleFunc("/healthz", healthz)
-	// mux := http.NewServeMux()
-	err := http.ListenAndServe(":80", nil)
-	if err != nil {
+	// http.HandleFunc("/healthz", healthz)
+	// err := http.ListenAndServe(":80", nil)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", index)
+	mux.HandleFunc("/healthz", healthz)
+	if err := http.ListenAndServe(":80", mux); err != nil {
 		log.Fatal(err)
 	}
 }
 
-// func index(w http.ResponseWriter, r *http.Request) {
-// 	io.WriteString(w, "ok")
-// }
-
-func healthz(w http.ResponseWriter, r *http.Request) {
+func index(w http.ResponseWriter, r *http.Request) {
 	//copy header
 	for k, v := range r.Header {
 		for _, vv := range v {
@@ -36,5 +36,16 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 	clientip := strings.Split(r.RemoteAddr, ":")[0]
 	log.Printf("Client IP: %s, Return Code: 200", clientip)
 	//return green
-	io.WriteString(w, "Green")
+	// io.WriteString(w, "OK")
+	fmt.Fprintf(w, "OK")
+}
+
+func healthz(w http.ResponseWriter, r *http.Request) {
+	//return green
+	// io.WriteString(w, "Green")
+	fmt.Fprintf(w, "Green")
+}
+
+func headerProcess(w http.ResponseWriter, r *http.Request) {
+
 }
