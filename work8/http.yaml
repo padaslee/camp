@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+data:
+  myenv: httpserver
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:  
+  labels:    
+	  app: httpserver  
+  name: httpserver
+spec:  
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:    
+  	matchLabels:      
+  	  app: httpserver  
+  strategy:    
+  	rollingUpdate:      
+  	  maxSurge: 25%      
+  	  maxUnavailable: 25%    
+  	type: RollingUpdate  
+template:    
+  metadata:      
+    creationTimestamp: null      
+	  labels:        
+      app: httpserver    
+  spec:      
+    containers:
+    - name: httpserver
+      image: httpserver:lastest         
+      imagePullPolicy: IfNotPresent
+      env:            
+      - name: httpport              
+        valueFrom:                
+          configMapKeyRef:         
+            name: my-config
+            key: myenv
+      resources:            
+		    limits:              
+		      cpu: 200m              
+		      memory: 100Mi            
+		    requests:              
+		      cpu: 20m              
+			  memory: 20Mi      
+      livenessProbe:
+        httpGet:    
+          path: /healthz
+          port: 8080
+          httpHeaders:
+          - name: Custom-Header
+            value: Awesome
+        initialDelaySeconds: 3
+        periodSeconds: 3
+		  readinessProbe:
+        httpGet:
+          path: /healthz
+          port: 8080
+        scheme: HTTP
+        initialDelaySeconds: 5
+        periodSeconds: 3
+      lifecycle:
+        preStop:
+          exec:
+            command:
+            - ps -ef | grep go              
+		  terminationMessagePath: /dev/termination-log
+		  terminationMessagePolicy: File
+	  dnsPolicy: ClusterFirst
+	  imagePullSecrets:
+	  - name: cloudnative
+  	restartPolicy: Always
+	  schedulerName: default-scheduler
+	  securityContext: {}
+	  terminationGracePeriodSeconds: 30
