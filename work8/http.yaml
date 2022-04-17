@@ -34,7 +34,7 @@ template:
       image: httpserver:lastest         
       imagePullPolicy: IfNotPresent
       env:            
-      - name: httpport              
+      - name: httpenv            
         valueFrom:                
           configMapKeyRef:         
             name: my-config
@@ -49,7 +49,7 @@ template:
       livenessProbe:
         httpGet:    
           path: /healthz
-          port: 8080
+          port: 80
           httpHeaders:
           - name: Custom-Header
             value: Awesome
@@ -58,7 +58,7 @@ template:
       readinessProbe:
         httpGet:
           path: /healthz
-          port: 8080
+          port: 80
         scheme: HTTP
         initialDelaySeconds: 5
         periodSeconds: 3
